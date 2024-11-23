@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pomodoro</title>
+    <link rel="stylesheet" media="screen" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <main>
+      <section class="pomodoro bg-[#86B173] min-h-[100vh] transition ease-out duration-300 w-full flex justify-center px-4 py-10 text-white">
+        <div class="setting-modal bg-[#00000060] fixed inset-0 flex justify-center items-start pt-[10%] hidden">
+          <div class="setting-modal__inner bg-white flex flex-col gap-10 items-center justify-center rounded-2xl text-gray-500 p-6 relative">
+            <button class="close-setting-btn absolute top-6 right-6"><i class="fas fa-times text-xl text-gray-500"></i></button>
+            <h2 class="text-xl">Setting</h2>
+            <div class="setting-modal__container flex flex-col gap-6">
+              <div class="setting-timers flex flex-col gap-4 w-fit">
+                <div class="flex gap-2">
+                  <i class="far fa-clock text-xl"></i>
+                  <h3 class="text-xl">TIMER <span class="text-sm">(minutes)</span></h3>
+                </div>
+                <div class="setting-timers__wrapper grid grid-cols-3 gap-6">
+                  <div class="setting-pomodoro flex flex-col gap items-start">
+                    <p class="font-medium">Pomodoro</p>
+                    <input class="setting-pomodoro-minutes py-1 w-full indent-2 max-w-[6rem] focus:outline-none" value="" type="number" name="" />
+                  </div>
+                  <div class="setting-short-break flex flex-col gap items-start">
+                    <p class="font-medium">Short Break</p>
+                    <input class="setting-short-break-minutes py-1 w-full indent-2 max-w-[6rem] focus:outline-none" value="" type="number" name="" />
+                  </div>
+                  <div class="setting-long-break flex flex-col gap items-start">
+                    <p class="font-medium">Long Break</p>
+                    <input class="setting-long-break-minutes py-1 w-full indent-2 max-w-[6rem] focus:outline-none" value="" type="number" name="" />
+                  </div>
+                </div>
+              </div>
+              <div class="setting-sound">
+                <div class="setting-sound__wrapper flex flex-col gap-4">
+                  <div class="text-xl text-gray-500 items-center flex gap-2">
+                    <i class="far fa-bell"></i>
+                    <h3>Sound</h3>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <p class="text-black font-medium">Alarm sound</p>
+                    <select class="sound-options" name="" id="">
+                      <option value="">Chicken</option>
+                      <option value="">Duck</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pomodoro__inner flex flex-col gap-8">
+          <header class="flex justify-between h-fit pb-8 border-[#00000040] border-b">
+            <div class="logo_wrapper flex gap-2 items-center text-2xl font-bold">
+              <i class="far fa-check-circle"></i>
+              <p>Pomodoro</p>
+            </div>
+            <button class="open-setting-modal-btn px-4 py-2 bg-white bg-opacity-20 flex gap-2 items-center">
+              <i class="fas fa-cog"></i>
+              <p>Setting</p>
+            </button>
+          </header>
+
+          <div class="pomodoro-timer flex flex-col items-center gap-8 px-4 md:px-14 py-8 bg-white bg-opacity-20">
+            <div class="pomodoro-sections font-medium flex gap-4">
+              <label class="grid cursor-pointer" for="pomodoro">
+                <input class="appearance-none peer pomodoro-time" type="radio" name="session" id="pomodoro" checked />
+                <span class="peer-checked:bg-[#00000020] transition-all px-4 py-2">Pomodoro</span>
+              </label>
+
+              <label class="grid cursor-pointer" for="short-break">
+                <input class="appearance-none peer pomodoro-short-break" type="radio" name="session" id="short-break" />
+                <span class="peer-checked:bg-[#00000020] transition-all px-4 py-2">Short Break</span>
+              </label>
+
+              <label class="grid cursor-pointer" for="long-break">
+                <input class="appearance-none peer pomodoro-long-break" type="radio" name="session" id="long-break" />
+                <span class="peer-checked:bg-[#00000020] transition-all px-4 py-2">Long Break</span>
+              </label>
+            </div>
+            <div class="pomodoro-minutes text-9xl font-bold">25:00</div>
+            <button class="pomodoro-minutes-btn text-2xl px-10 py-3 bg-white shadow-[0_4px_#B9B4B4] transition-all font-medium text-center text-[#86B173] active:shadow-none active:translate-y-[4px]">Start</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="src/index.js"></script>
+  </body>
+</html>
