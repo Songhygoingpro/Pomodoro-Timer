@@ -22,21 +22,21 @@
                   <h3 class="text-xl">TIMER <span class="text-sm">(minutes)</span></h3>
                 </div>
                 <div class="setting-timers__wrapper grid grid-cols-3 gap-6">
-                  <div class="setting-pomodoro flex flex-col gap items-start">
+                  <div class="setting-pomodoro flex flex-col gap-[6px] items-start">
                     <p class="font-medium">Pomodoro</p>
-                    <input class="setting-pomodoro-minutes py-1 w-full indent-2 max-w-[6rem] focus:outline-none" value="" type="number" name="" />
+                    <input data-sessions="WORK" min="1" max="180" class="setting-pomodoro-minutes py-1 w-full indent-2 bg-gray-200 max-w-[6rem] focus:outline-none" value="" type="number" name="" />
                   </div>
-                  <div class="setting-short-break flex flex-col gap items-start">
+                  <div class="setting-short-break flex flex-col gap-[6px] items-start">
                     <p class="font-medium">Short Break</p>
-                    <input class="setting-short-break-minutes py-1 w-full indent-2 max-w-[6rem] focus:outline-none" value="" type="number" name="" />
+                    <input data-sessions="SHORTBREAK" min="1" max="15" class="setting-short-break-minutes py-1 w-full indent-2 bg-gray-200 max-w-[6rem] focus:outline-none" value="" type="number" name="" />
                   </div>
-                  <div class="setting-long-break flex flex-col gap items-start">
+                  <div class="setting-long-break flex flex-col gap-[6px] items-start">
                     <p class="font-medium">Long Break</p>
-                    <input class="setting-long-break-minutes py-1 w-full indent-2 max-w-[6rem] focus:outline-none" value="" type="number" name="" />
+                    <input data-sessions="LONGBREAK" min="1" max="30" class="setting-long-break-minutes py-1 w-full indent-2 bg-gray-200 max-w-[6rem] focus:outline-none" value="" type="number" name="" />
                   </div>
                 </div>
               </div>
-              <div class="setting-sound">
+              <!-- <div class="setting-sound">
                 <div class="setting-sound__wrapper flex flex-col gap-4">
                   <div class="text-xl text-gray-500 items-center flex gap-2">
                     <i class="far fa-bell"></i>
@@ -50,7 +50,7 @@
                     </select>
                   </div>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -66,7 +66,7 @@
             </button>
           </header>
 
-          <div class="pomodoro-timer flex flex-col items-center gap-8 px-4 md:px-14 py-8 bg-white bg-opacity-20">
+          <div class="pomodoro-timer flex flex-col items-center gap-8 px-4 md:px-14 py-8 bg-white bg-opacity-10">
             <div class="pomodoro-sections font-medium flex gap-4">
               <label class="grid cursor-pointer" for="pomodoro">
                 <input class="appearance-none peer pomodoro-time" type="radio" name="session" id="pomodoro" checked />

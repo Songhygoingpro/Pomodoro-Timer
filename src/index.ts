@@ -1,6 +1,18 @@
 const Pomodoro = (() => {
-  type TimerState = "WORK" | "SHORTBREAK" | "LONGBREAK" | "PAUSED" | "STOPPED";
-  type TimerSession = "WORK" | "SHORTBREAK" | "LONGBREAK";
+  enum TimerState {
+    WORK = "WORK",
+    SHORTBREAK = "SHORTBREAK",
+    LONGBREAK = "LONGBREAK",
+    PAUSED = "PAUSED",
+    STOPPED = "STOPPED",
+  }
+  
+  enum TimerSession {
+    WORK = "WORK",
+    SHORTBREAK = "SHORTBREAK",
+    LONGBREAK = "LONGBREAK",
+  }
+  
 
   interface TimerSettings {
     workDuration: number;
@@ -12,7 +24,7 @@ const Pomodoro = (() => {
     state: TimerState;
     currentSession: TimerSession;
     remainingTime: number;
-    intervalID: ReturnType<typeof setInterval> | null;
+    intervalID: number | null;
   }
 
   const StateManager = (() => {
@@ -23,8 +35,8 @@ const Pomodoro = (() => {
     };
 
     let status: TimerStatus = {
-      state: "STOPPED",
-      currentSession: "WORK",
+      state: TimerState.STOPPED,
+      currentSession: TimerSession.WORK,
       remainingTime: settings.workDuration,
       intervalID: null,
     };
@@ -38,43 +50,71 @@ const Pomodoro = (() => {
     const longBreakButton = document.querySelector(".pomodoro-long-break") as HTMLInputElement;
     const pomodoroButton = document.querySelector(".pomodoro-time") as HTMLInputElement;
     const closeSettingModalBtn = document.querySelector(".close-setting-btn") as HTMLButtonElement;
-const settingModal = document.querySelector(".setting-modal") as HTMLElement;
-const openSettingModalBtn = document.querySelector(".open-setting-modal-btn") as HTMLButtonElement;
+    const settingModal = document.querySelector(".setting-modal") as HTMLElement;
+    const openSettingModalBtn = document.querySelector(".open-setting-modal-btn") as HTMLButtonElement;
+    const settingsPomodoro = document.querySelector(".setting-pomodoro-minutes") as HTMLInputElement;
+    const settingsShortBreak = document.querySelector(".setting-short-break-minutes") as HTMLInputElement;
+    const settingsLongBreak = document.querySelector(".setting-long-break-minutes") as HTMLInputElement;
+    const clickSound = new Audio("assets/audio/click-audio.mp3");
+    const alarmSound = new Audio("assets/audio/alarm.mp3");
 
+    settingsPomodoro.value = (StateManager.settings.workDuration / 60).toString();
+    settingsLongBreak.value = (StateManager.settings.longBreakDuration / 60).toString();
+    settingsShortBreak.value = (StateManager.settings.shortBreakDuration / 60).toString();
 
     const setupEventListeners = () => {
       startnPauseButton.addEventListener("click", () => {
         startnPauseButton.textContent === "Start" ? startTimer() : pauseTimer();
+        clickSound.play();
       });
 
       shortBreakButton.addEventListener("change", () => {
         if (shortBreakButton.checked === true) {
-          resetTimer("SHORTBREAK");
+          resetTimer(TimerSession.SHORTBREAK);
         }
       });
       longBreakButton.addEventListener("change", () => {
         if (longBreakButton.checked === true) {
-          resetTimer("LONGBREAK");
+          resetTimer(TimerSession.LONGBREAK);
         }
       });
       pomodoroButton.addEventListener("change", () => {
         if (pomodoroButton.checked === true) {
-          resetTimer("WORK");
+          resetTimer(TimerSession.WORK);
         }
       });
 
-      closeSettingModalBtn.addEventListener('click', () => settingModal.classList.add("hidden"));
-      openSettingModalBtn.addEventListener('click', () => settingModal.classList.remove("hidden"));
+      settingsPomodoro.addEventListener("change", () => {
+        updateTimer(settingsPomodoro.getAttribute("data-sessions")?.toString());
+      });
+
+      settingsLongBreak.addEventListener("change", () => {
+        updateTimer(settingsLongBreak.getAttribute("data-sessions")?.toString());
+      });
+
+      settingsShortBreak.addEventListener("change", () => {
+        updateTimer(settingsShortBreak.getAttribute("data-sessions")?.toString());
+      });
+
+      closeSettingModalBtn.addEventListener("click", () => settingModal.classList.add("hidden"));
+      openSettingModalBtn.addEventListener("click", () => settingModal.classList.remove("hidden"));
     };
 
-    
+    const updateTimer = (targetSession: any) => {
+      StateManager.settings.workDuration = Number(settingsPomodoro.value) * 60;
+      StateManager.settings.shortBreakDuration = Number(settingsShortBreak.value) * 60;
+      StateManager.settings.longBreakDuration = Number(settingsLongBreak.value) * 60;
+      if (StateManager.status.currentSession === targetSession) {
+        resetTimer(targetSession);
+      }
+    };
 
     const startTimer = () => {
       if (startnPauseButton.textContent === "Start") {
         startnPauseButton.textContent = "Paused";
-        StateManager.status.state = "WORK";
+        StateManager.status.state = TimerState.WORK;
         if (!StateManager.status.intervalID) {
-          StateManager.status.intervalID = window.setInterval(updateTimer, 1000);
+          StateManager.status.intervalID = window.setInterval(loadTimer, 1000);
         }
       }
     };
@@ -84,49 +124,46 @@ const openSettingModalBtn = document.querySelector(".open-setting-modal-btn") as
         startnPauseButton.textContent = "Start";
         clearInterval(StateManager.status.intervalID);
         StateManager.status.intervalID = null;
-        StateManager.status.state = "PAUSED";
+        StateManager.status.state = TimerState.PAUSED;
       }
     };
 
-    const resetTimer = (session?: TimerState) => {
+    const resetTimer = (session?: TimerSession) => {
+      const durations = {
+        WORK: StateManager.settings.workDuration,
+        SHORTBREAK: StateManager.settings.shortBreakDuration,
+        LONGBREAK: StateManager.settings.longBreakDuration,
+      };
+    
       if (StateManager.status.intervalID) {
         clearInterval(StateManager.status.intervalID);
         startnPauseButton.textContent = "Start";
       }
-
-      if (session === "SHORTBREAK") {
-        StateManager.status = {
-          state: "STOPPED",
-          currentSession: "SHORTBREAK",
-          remainingTime: StateManager.settings.shortBreakDuration,
-          intervalID: null,
-        };
-      } else if (session === "WORK") {
-        StateManager.status = {
-          state: "STOPPED",
-          currentSession: "WORK",
-          remainingTime: StateManager.settings.workDuration,
-          intervalID: null,
-        };
-      } else {
-        StateManager.status = {
-          state: "STOPPED",
-          currentSession: "LONGBREAK",
-          remainingTime: StateManager.settings.longBreakDuration,
-          intervalID: null,
-        };
-      }
-
+    
+      StateManager.status = {
+        state: TimerState.STOPPED,
+        currentSession: session || TimerSession.WORK,
+        remainingTime: durations[session || TimerSession.WORK],
+        intervalID: null,
+      };
+    
       UIModule.updateDisplay();
-    };
+    };    
 
-    const updateTimer = () => {
-      if (StateManager.status.remainingTime > 0) {
+    const loadTimer = () => {
+      if (StateManager.status.remainingTime >= 0) {
         StateManager.status.remainingTime--;
         UIModule.updateDisplay();
+        if (StateManager.status.remainingTime === 0) {
+          alarmSound.play();
+          resetTimer(StateManager.status.currentSession);
+          setTimeout(() => {
+            alarmSound.pause();
+          }, 3000);
+        }
       } else {
         clearInterval(StateManager.status.intervalID!);
-        StateManager.status.state = StateManager.status.state === "WORK" ? "SHORTBREAK" : "WORK";
+        StateManager.status.state = StateManager.status.state === TimerState.WORK ? TimerState.SHORTBREAK : TimerState.WORK;
         StateManager.status.remainingTime = StateManager.status.state === "WORK" ? StateManager.settings.workDuration : StateManager.settings.shortBreakDuration;
         startTimer();
       }
@@ -139,7 +176,6 @@ const openSettingModalBtn = document.querySelector(".open-setting-modal-btn") as
     const timerDisplay = document.querySelector(".pomodoro-minutes") as HTMLParagraphElement;
     const pomodoroPage = document.querySelector(".pomodoro") as HTMLBodyElement;
     const startnPauseButton = document.querySelector(".pomodoro-minutes-btn") as HTMLButtonElement;
-
 
     const updateDisplay = () => {
       const minutes = Math.floor(StateManager.status.remainingTime / 60)
