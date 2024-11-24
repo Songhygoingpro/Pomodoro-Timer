@@ -6,13 +6,12 @@ const Pomodoro = (() => {
     PAUSED = "PAUSED",
     STOPPED = "STOPPED",
   }
-  
+
   enum TimerSession {
     WORK = "WORK",
     SHORTBREAK = "SHORTBREAK",
     LONGBREAK = "LONGBREAK",
   }
-  
 
   interface TimerSettings {
     workDuration: number;
@@ -26,13 +25,27 @@ const Pomodoro = (() => {
     remainingTime: number;
     intervalID: number | null;
   }
+  
+  const HandleLocalStorage = (() => {
+    function saveToLocalStorage(Timer: TimerSettings) {
+      localStorage.setItem("Timer", JSON.stringify(Timer));
+    }
+
+    function loadFromLocalStorage() {
+      const storedTimer = localStorage.getItem("Timer");
+      return storedTimer ? JSON.parse(storedTimer) : [];
+    }
+    return { saveToLocalStorage, loadFromLocalStorage };
+  })();
 
   const StateManager = (() => {
-    const settings: TimerSettings = {
+    const defaultSettings: TimerSettings = {
       workDuration: 25 * 60,
       shortBreakDuration: 5 * 60,
       longBreakDuration: 15 * 60,
     };
+
+    const settings: TimerSettings = HandleLocalStorage.loadFromLocalStorage() || defaultSettings;
 
     let status: TimerStatus = {
       state: TimerState.STOPPED,
@@ -43,6 +56,8 @@ const Pomodoro = (() => {
 
     return { settings, status };
   })();
+
+
 
   const PomodoroController = (() => {
     const startnPauseButton = document.querySelector(".pomodoro-minutes-btn") as HTMLButtonElement;
@@ -104,6 +119,7 @@ const Pomodoro = (() => {
       StateManager.settings.workDuration = Number(settingsPomodoro.value) * 60;
       StateManager.settings.shortBreakDuration = Number(settingsShortBreak.value) * 60;
       StateManager.settings.longBreakDuration = Number(settingsLongBreak.value) * 60;
+      HandleLocalStorage.saveToLocalStorage(StateManager.settings);
       if (StateManager.status.currentSession === targetSession) {
         resetTimer(targetSession);
       }
@@ -134,21 +150,21 @@ const Pomodoro = (() => {
         SHORTBREAK: StateManager.settings.shortBreakDuration,
         LONGBREAK: StateManager.settings.longBreakDuration,
       };
-    
+
       if (StateManager.status.intervalID) {
         clearInterval(StateManager.status.intervalID);
         startnPauseButton.textContent = "Start";
       }
-    
+
       StateManager.status = {
         state: TimerState.STOPPED,
         currentSession: session || TimerSession.WORK,
         remainingTime: durations[session || TimerSession.WORK],
         intervalID: null,
       };
-    
+
       UIModule.updateDisplay();
-    };    
+    };
 
     const loadTimer = () => {
       if (StateManager.status.remainingTime >= 0) {
@@ -169,7 +185,7 @@ const Pomodoro = (() => {
       }
     };
 
-    return { setupEventListeners };
+    return { setupEventListeners, resetTimer };
   })();
 
   const UIModule = (() => {
@@ -222,9 +238,9 @@ const Pomodoro = (() => {
     return { updateDisplay };
   })();
 
-  const init = async () => {
-    UIModule.updateDisplay();
-    PomodoroController.setupEventListeners();
+  const init = () => {
+    PomodoroController.setupEventListeners(); // Setup event listeners
+    UIModule.updateDisplay(); // Update UI display
   };
 
   return { init };

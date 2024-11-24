@@ -14,12 +14,23 @@ const Pomodoro = (() => {
         TimerSession["SHORTBREAK"] = "SHORTBREAK";
         TimerSession["LONGBREAK"] = "LONGBREAK";
     })(TimerSession || (TimerSession = {}));
+    const HandleLocalStorage = (() => {
+        function saveToLocalStorage(Timer) {
+            localStorage.setItem("Timer", JSON.stringify(Timer));
+        }
+        function loadFromLocalStorage() {
+            const storedTimer = localStorage.getItem("Timer");
+            return storedTimer ? JSON.parse(storedTimer) : [];
+        }
+        return { saveToLocalStorage, loadFromLocalStorage };
+    })();
     const StateManager = (() => {
-        const settings = {
+        const defaultSettings = {
             workDuration: 25 * 60,
             shortBreakDuration: 5 * 60,
             longBreakDuration: 15 * 60,
         };
+        const settings = HandleLocalStorage.loadFromLocalStorage() || defaultSettings;
         let status = {
             state: TimerState.STOPPED,
             currentSession: TimerSession.WORK,
@@ -83,6 +94,7 @@ const Pomodoro = (() => {
             StateManager.settings.workDuration = Number(settingsPomodoro.value) * 60;
             StateManager.settings.shortBreakDuration = Number(settingsShortBreak.value) * 60;
             StateManager.settings.longBreakDuration = Number(settingsLongBreak.value) * 60;
+            HandleLocalStorage.saveToLocalStorage(StateManager.settings);
             if (StateManager.status.currentSession === targetSession) {
                 resetTimer(targetSession);
             }
@@ -141,7 +153,7 @@ const Pomodoro = (() => {
                 startTimer();
             }
         };
-        return { setupEventListeners };
+        return { setupEventListeners, resetTimer };
     })();
     const UIModule = (() => {
         const timerDisplay = document.querySelector(".pomodoro-minutes");
@@ -189,9 +201,9 @@ const Pomodoro = (() => {
         };
         return { updateDisplay };
     })();
-    const init = async () => {
-        UIModule.updateDisplay();
-        PomodoroController.setupEventListeners();
+    const init = () => {
+        PomodoroController.setupEventListeners(); // Setup event listeners
+        UIModule.updateDisplay(); // Update UI display
     };
     return { init };
 })();

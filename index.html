@@ -70,20 +70,20 @@
             <div class="pomodoro-sections font-medium flex gap-4">
               <label class="grid cursor-pointer" for="pomodoro">
                 <input class="appearance-none peer pomodoro-time" type="radio" name="session" id="pomodoro" checked />
-                <span class="peer-checked:bg-[#00000020] transition-all px-4 py-2">Pomodoro</span>
+                <span class="peer-checked:bg-[#00000020] transition-all px-4 py-2 flex">Pomo<span class="sm:block hidden "> doro</span></span>
               </label>
 
               <label class="grid cursor-pointer" for="short-break">
                 <input class="appearance-none peer pomodoro-short-break" type="radio" name="session" id="short-break" />
-                <span class="peer-checked:bg-[#00000020] transition-all px-4 py-2">Short Break</span>
+                <span class="peer-checked:bg-[#00000020] transition-all px-4 py-2 flex gap-2">Short <span class="sm:block hidden "> Break</span></span>
               </label>
 
               <label class="grid cursor-pointer" for="long-break">
                 <input class="appearance-none peer pomodoro-long-break" type="radio" name="session" id="long-break" />
-                <span class="peer-checked:bg-[#00000020] transition-all px-4 py-2">Long Break</span>
+                <span class="peer-checked:bg-[#00000020] transition-all px-4 py-2 flex gap-2">Long <span class="sm:block hidden "> Break</span></span>
               </label>
             </div>
-            <div class="pomodoro-minutes text-9xl font-bold">25:00</div>
+            <div class="pomodoro-minutes text-8xl md:text-9xl font-bold">25:00</div>
             <button class="pomodoro-minutes-btn text-2xl px-10 py-3 bg-white shadow-[0_4px_#B9B4B4] transition-all font-medium text-center text-[#86B173] active:shadow-none active:translate-y-[4px]">Start</button>
           </div>
         </div>
