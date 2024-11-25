@@ -30,7 +30,7 @@ const Pomodoro = (() => {
             shortBreakDuration: 5 * 60,
             longBreakDuration: 15 * 60,
         };
-        const settings = HandleLocalStorage.loadFromLocalStorage() || defaultSettings;
+        const settings = HandleLocalStorage.loadFromLocalStorage().workDuration || defaultSettings;
         let status = {
             state: TimerState.STOPPED,
             currentSession: TimerSession.WORK,
