@@ -231,8 +231,6 @@ const Pomodoro = (() => {
     const init = () => {
         PomodoroController.setupEventListeners(); // Setup event listeners
         UIModule.updateDisplay(); // Update UI display
-        console.log(HandleLocalStorage.loadFromLocalStorage().AlarmSound);
-        console.log(StateManager.AlarmSound);
     };
     return { init };
 })();
