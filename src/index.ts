@@ -25,15 +25,18 @@ const Pomodoro = (() => {
     remainingTime: number;
     intervalID: number | null;
   }
-  
+
   const HandleLocalStorage = (() => {
-    function saveToLocalStorage(Timer: TimerSettings) {
+    function saveToLocalStorage(Timer?: TimerSettings, AlarmSound? : string) {
       localStorage.setItem("Timer", JSON.stringify(Timer));
+      localStorage.setItem("AlarmSound", JSON.stringify(AlarmSound));
     }
 
     function loadFromLocalStorage() {
-      const storedTimer = localStorage.getItem("Timer");
-      return storedTimer ? JSON.parse(storedTimer) : [];
+      return {
+        Timer: JSON.parse(localStorage.getItem("Timer") || "null"),
+        AlarmSound: JSON.parse(localStorage.getItem("AlarmSound") || '"BeepTone"'), 
+      };
     }
     return { saveToLocalStorage, loadFromLocalStorage };
   })();
@@ -45,7 +48,9 @@ const Pomodoro = (() => {
       longBreakDuration: 15 * 60,
     };
 
-    const settings: TimerSettings = HandleLocalStorage.loadFromLocalStorage().workDuration ? HandleLocalStorage.loadFromLocalStorage() : defaultSettings;
+    const AlarmSound: string = HandleLocalStorage.loadFromLocalStorage().AlarmSound;
+
+    const settings: TimerSettings = HandleLocalStorage.loadFromLocalStorage().Timer.workDuration ? HandleLocalStorage.loadFromLocalStorage().Timer : defaultSettings;
 
     let status: TimerStatus = {
       state: TimerState.STOPPED,
@@ -54,7 +59,7 @@ const Pomodoro = (() => {
       intervalID: null,
     };
 
-    return { settings, status };
+    return { settings, status, AlarmSound };
   })();
 
   const PomodoroController = (() => {
@@ -68,12 +73,16 @@ const Pomodoro = (() => {
     const settingsPomodoro = document.querySelector(".setting-pomodoro-minutes") as HTMLInputElement;
     const settingsShortBreak = document.querySelector(".setting-short-break-minutes") as HTMLInputElement;
     const settingsLongBreak = document.querySelector(".setting-long-break-minutes") as HTMLInputElement;
+    const alarmSound = document.getElementById("alarm-sound") as HTMLSelectElement;
     const clickSound = new Audio("assets/audio/click-audio.mp3");
-    const alarmSound = new Audio("assets/audio/alarm.mp3");
+    const alarmBeepTone = new Audio("assets/audio/alarm-beep-tone.mp3");
+    const alarmBeepChime = new Audio("assets/audio/alarm-beep-chime.mp3");
+    const alarmBreach = new Audio("assets/audio/alarm-breach.wav");
 
     settingsPomodoro.value = (StateManager.settings.workDuration / 60).toString();
     settingsLongBreak.value = (StateManager.settings.longBreakDuration / 60).toString();
     settingsShortBreak.value = (StateManager.settings.shortBreakDuration / 60).toString();
+    alarmSound.value = StateManager.AlarmSound;
 
     const setupEventListeners = () => {
       startnPauseButton.addEventListener("click", () => {
@@ -111,13 +120,14 @@ const Pomodoro = (() => {
 
       closeSettingModalBtn.addEventListener("click", () => settingModal.classList.add("hidden"));
       openSettingModalBtn.addEventListener("click", () => settingModal.classList.remove("hidden"));
+      alarmSound.addEventListener("change", () => {handleAlarmSetting()})
     };
 
     const updateTimer = (targetSession: any) => {
       StateManager.settings.workDuration = Number(settingsPomodoro.value) * 60;
       StateManager.settings.shortBreakDuration = Number(settingsShortBreak.value) * 60;
       StateManager.settings.longBreakDuration = Number(settingsLongBreak.value) * 60;
-      HandleLocalStorage.saveToLocalStorage(StateManager.settings);
+      HandleLocalStorage.saveToLocalStorage(StateManager.settings, StateManager.AlarmSound);
       if (StateManager.status.currentSession === targetSession) {
         resetTimer(targetSession);
       }
@@ -164,22 +174,45 @@ const Pomodoro = (() => {
       UIModule.updateDisplay();
     };
 
+    const handleAlarmSetting = () => {
+      switch (alarmSound.value) {
+        case "BeepTone":
+          playAlarm(alarmBeepTone);
+          StateManager.AlarmSound = "BeepTone";
+          HandleLocalStorage.saveToLocalStorage(StateManager.settings, StateManager.AlarmSound);
+          break;
+        case "BeepChime":
+          playAlarm(alarmBeepChime);
+          StateManager.AlarmSound = "BeepChime";
+          HandleLocalStorage.saveToLocalStorage(StateManager.settings, StateManager.AlarmSound);
+          break;
+        case "Breach":
+          playAlarm(alarmBreach);
+          StateManager.AlarmSound = "Breach";
+          HandleLocalStorage.saveToLocalStorage(StateManager.settings, StateManager.AlarmSound);
+          break;
+      }
+    };
+
+    const playAlarm = (alarm: any) => {
+      alarm.play();
+      setTimeout(() => {
+        alarm.pause();
+      }, 3000);
+    };
+
     const loadTimer = () => {
-      if (StateManager.status.remainingTime >= 0) {
+      if (StateManager.status.remainingTime > 0) {
         StateManager.status.remainingTime--;
         UIModule.updateDisplay();
-        if (StateManager.status.remainingTime === 0) {
-          alarmSound.play();
-          resetTimer(StateManager.status.currentSession);
-          setTimeout(() => {
-            alarmSound.pause();
-          }, 3000);
-        }
       } else {
         clearInterval(StateManager.status.intervalID!);
         StateManager.status.state = StateManager.status.state === TimerState.WORK ? TimerState.SHORTBREAK : TimerState.WORK;
         StateManager.status.remainingTime = StateManager.status.state === "WORK" ? StateManager.settings.workDuration : StateManager.settings.shortBreakDuration;
         startTimer();
+        handleAlarmSetting();
+        resetTimer(StateManager.status.currentSession);
+    
       }
     };
 
@@ -192,9 +225,7 @@ const Pomodoro = (() => {
     const startnPauseButton = document.querySelector(".pomodoro-minutes-btn") as HTMLButtonElement;
 
     const updateDisplay = () => {
-      const minutes = Math.floor(StateManager.status.remainingTime / 60)
-        .toString()
-        .padStart(2, "0");
+      const minutes = Math.floor(StateManager.status.remainingTime / 60).toString().padStart(2, "0");
       const seconds = (StateManager.status.remainingTime % 60).toString().padStart(2, "0");
       timerDisplay.textContent = `${minutes}:${seconds}`;
       if (StateManager.status.currentSession === "SHORTBREAK") {
@@ -239,6 +270,8 @@ const Pomodoro = (() => {
   const init = () => {
     PomodoroController.setupEventListeners(); // Setup event listeners
     UIModule.updateDisplay(); // Update UI display
+    console.log(HandleLocalStorage.loadFromLocalStorage().AlarmSound);
+    console.log(StateManager.AlarmSound);
   };
 
   return { init };
